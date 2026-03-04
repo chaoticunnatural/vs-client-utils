@@ -13,7 +13,8 @@ public class CrowsNest {
     public static final Logger LOGGER = LogManager.getLogger();
 
     public CrowsNest(FMLJavaModLoadingContext context) {
-        TypeBranches.register();
+        TypeBranches.registerAdapters();
+        TypeBranches.registerBridges();
         TypeFormatters.register();
     }
 

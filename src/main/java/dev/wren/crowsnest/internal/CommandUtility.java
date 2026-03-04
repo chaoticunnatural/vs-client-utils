@@ -16,7 +16,8 @@ import static dev.wren.crowsnest.internal.FormatUtility.asCommandOutput;
 public class CommandUtility {
 
     public static <T> LiteralArgumentBuilder<CommandSourceStack> shipNode(String name, Function<LoadedShip, T> func, Class<T> type) {
-        CommandNode<T> node = new CommandNode<>(name, func).typeAdapter(type);
+        CommandNode<T> node = new CommandNode<>(name, func);
+        node.typeAdapter(type);
 
         return node.build();
     }
