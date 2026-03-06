@@ -17,6 +17,7 @@ import org.valkyrienskies.core.api.bodies.properties.BodyKinematics;
 import org.valkyrienskies.core.api.bodies.properties.BodyTransform;
 import org.valkyrienskies.core.api.ships.LoadedShip;
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim;
+import org.valkyrienskies.core.api.ships.properties.IShipActiveChunksSet;
 
 import java.util.function.Consumer;
 
@@ -33,10 +34,6 @@ public class ShipInfoCommand {
                     .then(shipNode("slug", LoadedShip::getSlug, String.class))
                     .then(shipNode("shipAABB", LoadedShip::getShipAABB, AABBic.class))
                     .then(shipNode("worldAABB", LoadedShip::getWorldAABB, AABBdc.class))
-                    .then(shipNode("shipToWorld", LoadedShip::getShipToWorld, Matrix4dc.class))
-                    .then(shipNode("worldToShip", LoadedShip::getWorldToShip, Matrix4dc.class))
-                    .then(shipNode("angularVelocity", LoadedShip::getAngularVelocity, Vector3dc.class))
-                    .then(shipNode("velocity", LoadedShip::getVelocity, Vector3dc.class))
                     .then(shipBranch("kinematics", LoadedShip::getKinematics, BodyKinematics.class, kinematicsBranch -> {
                         kinematicsBranch.subNode("velocity", BodyKinematics::getVelocity, Vector3dc.class);
                         kinematicsBranch.subNode("rotation", BodyKinematics::getRotation, Quaterniondc.class);
@@ -50,6 +47,14 @@ public class ShipInfoCommand {
                     .then(shipBranch("chunkClaim", LoadedShip::getChunkClaim, ChunkClaim.class, chunkClaimBranch -> {
                         chunkClaimBranch.subNode("size", ChunkClaim::getSize, Integer.class);
                         chunkClaimBranch.subNode("toLong", ChunkClaim::toLong, Long.class);
+                        chunkClaimBranch.subNode("xIndex", ChunkClaim::getXIndex, Integer.class);
+                        chunkClaimBranch.subNode("xStart", ChunkClaim::getXStart, Integer.class);
+                        chunkClaimBranch.subNode("xMiddle", ChunkClaim::getXMiddle, Integer.class);
+                        chunkClaimBranch.subNode("xEnd", ChunkClaim::getXEnd, Integer.class);
+                        chunkClaimBranch.subNode("zIndex", ChunkClaim::getZIndex, Integer.class);
+                        chunkClaimBranch.subNode("zStart", ChunkClaim::getZStart, Integer.class);
+                        chunkClaimBranch.subNode("zMiddle", ChunkClaim::getZMiddle, Integer.class);
+                        chunkClaimBranch.subNode("zEnd", ChunkClaim::getZEnd, Integer.class);
                     }))
                     .then(shipNode("chunkClaimDimension", LoadedShip::getChunkClaimDimension, String.class))
             );
