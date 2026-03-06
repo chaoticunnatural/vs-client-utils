@@ -1,10 +1,13 @@
 package dev.wren.crowsnest.internal;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import dev.wren.crowsnest.internal.reg.TypeBranchRegistry;
+import com.mojang.brigadier.context.CommandContext;
+import dev.wren.crowsnest.internal.reg.TypeAdapterRegistry;
 import dev.wren.crowsnest.internal.reg.TypeBridgeRegistry;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.network.chat.Component;
 import org.valkyrienskies.core.api.ships.LoadedShip;
 
@@ -13,107 +16,84 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static dev.wren.crowsnest.internal.CommandUtility.shipHandle;
+import static dev.wren.crowsnest.internal.FormatUtility.asCommandOutput;
 
-@SuppressWarnings("unchecked")
 public class CommandNode<T> {
 
     private final String name;
     private final Function<LoadedShip, T> resolver;
-    private boolean built = false;
-    private final boolean directoryBranch;
-    private LiteralArgumentBuilder<CommandSourceStack> cached;
-    private Function<Object, Object> valueWrapper = Function.identity();
+    private final Class<T> type;
 
     private final List<CommandNode<?>> children = new ArrayList<>();
 
-    private Class<T> type;
+    private boolean built = false;
+    private LiteralArgumentBuilder<CommandSourceStack> cached;
 
-
+    @SuppressWarnings("unchecked")
     public CommandNode(String name, Function<LoadedShip, T> resolver, Class<T> type) {
         this.name = name;
-        this.resolver = resolver;
-        this.directoryBranch = false;
-        this.type = type;
-    }
 
-    public CommandNode(String name, Class<T> type) {
-        this.name = name;
-        this.resolver = null;
-        this.directoryBranch = true;
-        this.type = type;
-    }
+        TypeBridgeRegistry.TypeBridge<T, ?> bridge = TypeBridgeRegistry.getBridge(type);
 
+        Class<?> bridgedType = bridge.to();
 
-    public CommandNode<T> typeAdapter(Class<T> type) {
-        this.type = type;
-        return this;
-    }
+        Function<LoadedShip, ?> bridgedResolver = resolver.andThen(bridge::convert);
 
-    public CommandNode<T> doubleAdapter() {
-        this.type = (Class<T>) Double.class;
-        return this;
-    }
+        this.resolver = (Function<LoadedShip, T>) bridgedResolver;
+        this.type = (Class<T>) bridgedType;
 
-    public CommandNode<T> integerAdapter() {
-        this.type = (Class<T>) Integer.class;
-        return this;
-    }
-
-    public CommandNode<T> subCommands(Consumer<CommandNode<T>> consumer) {
-        consumer.accept(this);
-        return this;
     }
 
 
-    public static <I, E> CommandNode<E> shipNode(String name, Function<LoadedShip, I> extractor, Class<I> type) {
-        TypeBridgeRegistry.TypeBridge<I, E> bridge = (TypeBridgeRegistry.TypeBridge<I, E>) TypeBridgeRegistry.getBridge(type);
-
-        Function<LoadedShip, E> resolver = t -> bridge.convert(extractor.apply(t));
-
-        return new CommandNode<>(name, resolver, bridge.to());
+    // NODES
+    public static <I> LiteralArgumentBuilder<CommandSourceStack> shipNode(String name, Function<LoadedShip, I> resolver, Class<I> type) {
+        return new CommandNode<>(name, resolver, type).build();
     }
 
-    public static <I, E> CommandNode<E> shipBranch(String name, Function<LoadedShip, I> extractor, Class<I> type, Consumer<CommandNode<E>> subCommands) {
-        TypeBridgeRegistry.TypeBridge<I, E> bridge = (TypeBridgeRegistry.TypeBridge<I, E>) TypeBridgeRegistry.getBridge(type);
+    public static <I> LiteralArgumentBuilder<CommandSourceStack> shipBranch(String name, Function<LoadedShip, I> resolver, Class<I> type, Consumer<CommandNode<I>> subCommands) {
+        CommandNode<I> node = new CommandNode<>(name, resolver, type);
 
-        Function<LoadedShip, E> resolver = t -> bridge.convert(extractor.apply(t));
+        subCommands.accept(node);
 
-        return new CommandNode<>(name, resolver, bridge.to()).subCommands(subCommands);
+        return node.build();
     }
 
-    public <I, E> CommandNode<E> subNode(String name, Function<T, I> extractor, Class<E> type) {
-        TypeBridgeRegistry.TypeBridge<I, E> bridge = (TypeBridgeRegistry.TypeBridge<I, E>) TypeBridgeRegistry.getBridge(type);
+    private static <T> Function<LoadedShip, ?> applyBridge(Function<LoadedShip, T> resolver, Class<T> type) {
+        TypeBridgeRegistry.TypeBridge<T, ?> bridge = TypeBridgeRegistry.getBridge(type);
 
-        Function<T, E> resolver = t -> bridge.convert(extractor.apply(t));
+        if (bridge == null) {
+            return resolver;
+        }
 
-        return new CommandNode<>(name, ship -> resolver.apply(this.resolver.apply(ship)), type);
+        return resolver.andThen(bridge::convert);
     }
 
-    public <R> CommandNode<R> dirBranchNode(String name, Class<R> type, Consumer<CommandNode<R>> consumer) {
-        CommandNode<R> childBranch = new CommandNode<>(name, type).subCommands(consumer);
+    // SUBNODES
+    public <N> CommandNode<N> subNode(String name, Function<T, N> extractor, Class<N> type) {
+        Function<LoadedShip, N> newResolver = resolver.andThen(extractor);
 
-        children.add(childBranch);
+        CommandNode<N> child = new CommandNode<>(name, newResolver, type);
+        children.add(child);
 
-        return childBranch;
+        return child;
     }
+
+    public <N> CommandNode<N> subBranch(String name, Function<T, N> extractor, Class<N> type, Consumer<CommandNode<N>> subCommands) {
+        CommandNode<N> child = subNode(name, extractor, type);
+        subCommands.accept(child);
+        return child;
+    }
+
 
     public LiteralArgumentBuilder<CommandSourceStack> build() {
+
         if (built) return cached;
 
         LiteralArgumentBuilder<CommandSourceStack> node = Commands.literal(name);
 
-        TypeBranchRegistry.applyIfPresent(type, this);
+        TypeAdapterRegistry.applyIfPresent(type, this);
 
-
-        if (!directoryBranch) {
-            node.executes(ctx -> shipHandle(ctx, resolver, name));
-        } else {
-            node.executes(ctx -> {
-                ctx.getSource().sendFailure(Component.literal("No value specified!"));
-                return 0;
-            });
-        }
+        node.executes(this::shipHandle);
 
         for (CommandNode<?> child : children) {
             node.then(child.build());
@@ -123,5 +103,20 @@ public class CommandNode<T> {
         built = true;
 
         return node;
+    }
+
+    public int shipHandle(CommandContext<CommandSourceStack> context) {
+        LoadedShip ship = Utility.getShipAtPos(context.getSource().getUnsidedLevel(), BlockPosArgument.getBlockPos(context, "pos"));
+
+        if (ship == null) {
+            context.getSource().sendFailure(Component.literal("No ship found!"));
+            return 0;
+        }
+
+        T result = resolver.apply(ship);
+
+        context.getSource().sendSuccess(() -> asCommandOutput(name, result), false);
+
+        return Command.SINGLE_SUCCESS;
     }
 }

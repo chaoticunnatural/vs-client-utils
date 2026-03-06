@@ -8,7 +8,7 @@ import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 
 public class AllCommands {
 
-    public static void register(RegisterClientCommandsEvent event) {
+    public static void registerClient(RegisterClientCommandsEvent event) {
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("crowsnest")
             .then(ShipyardToWorldPosCommand.register())
             .then(ShipInfoCommand.register())

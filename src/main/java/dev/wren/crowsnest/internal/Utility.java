@@ -32,26 +32,6 @@ public class Utility {
         return loadedShip == null ? "ground" : loadedShip.getSlug();
     }
 
-    private static final AABB EMPTY = new AABB(0,0,0,0,0,0);
-
-    // i hate this
-    public static AABB convertToAABB(AABBdc aabBdc) {
-        if (aabBdc == null) return EMPTY;
-        return new AABB(aabBdc.minX(), aabBdc.minY(), aabBdc.minZ(), aabBdc.maxX(), aabBdc.maxY(), aabBdc.maxZ());
-    }
-
-    // same here
-    public static AABB convertToAABB(AABBfc aabBfc) {
-        if (aabBfc == null) return EMPTY;
-        return new AABB(aabBfc.minX(), aabBfc.minY(), aabBfc.minZ(), aabBfc.maxX(), aabBfc.maxY(), aabBfc.maxZ());
-    }
-
-    // like why
-    public static AABB convertToAABB(AABBic aabBic) {
-        if (aabBic == null) return EMPTY;
-        return new AABB(aabBic.minX(), aabBic.minY(), aabBic.minZ(), aabBic.maxX(), aabBic.maxY(), aabBic.maxZ());
-    }
-
     public static BlockPos getWorldPos(Level level, BlockPos pos) {
         return getWorldPos(level, pos, getShipIdAtPos(level, pos));
     }
@@ -74,12 +54,5 @@ public class Utility {
 
     public static String formatBlockPos(BlockPos pos) {
         return formatAnyPos(pos.getX(), pos.getY(), pos.getZ());
-    }
-
-    public static String formatAABB(AABB aabb) {
-        String pos1 = formatAnyPos(aabb.minX, aabb.minY, aabb.minZ);
-        String pos2 = formatAnyPos(aabb.maxX, aabb.maxY, aabb.maxZ);
-
-        return pos1 + " to " + pos2 + ", sized " + aabb.getXsize() + "x" + aabb.getYsize() + "x" + aabb.getZsize();
     }
 }

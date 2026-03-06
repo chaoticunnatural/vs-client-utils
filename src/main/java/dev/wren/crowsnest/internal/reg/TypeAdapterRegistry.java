@@ -5,13 +5,11 @@ import dev.wren.crowsnest.internal.CommandNode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static dev.wren.crowsnest.CrowsNest.LOGGER;
-import static dev.wren.crowsnest.internal.reg.TypeBridgeRegistry.getBridge;
 
 @SuppressWarnings("unchecked")
-public class TypeBranchRegistry {
+public class TypeAdapterRegistry {
 
     private static final Map<Class<?>, Consumer<CommandNode<?>>> ADAPTERS = new HashMap<>();
 
@@ -30,6 +28,4 @@ public class TypeBranchRegistry {
             adapter.accept(nodeBuilder);
         }
     }
-
-
 }
