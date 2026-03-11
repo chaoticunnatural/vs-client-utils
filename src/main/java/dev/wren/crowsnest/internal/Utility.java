@@ -28,11 +28,6 @@ public class Utility {
         return VSGameUtilsKt.getLoadedShipManagingPos(level, pos);
     }
 
-    public static String getShipSlugAtPos(Level level, BlockPos pos) {
-        LoadedShip loadedShip = VSGameUtilsKt.getLoadedShipManagingPos(level, pos);
-        return loadedShip == null ? "ground" : loadedShip.getSlug();
-    }
-
     public static BlockPos getWorldPos(Level level, BlockPos pos) {
         return getWorldPos(level, pos, getShipIdAtPos(level, pos));
     }
@@ -47,19 +42,5 @@ public class Utility {
             }
         }
         return BlockPos.containing(localPos.x, localPos.y, localPos.z);
-    }
-
-    public static String formatAnyPos(double x, double y, double z) {
-        return "("+x+", "+y+", "+z+")";
-    }
-
-    public static String formatBlockPos(BlockPos pos) {
-        return formatAnyPos(pos.getX(), pos.getY(), pos.getZ());
-    }
-
-    public static void skipWhitespace(StringReader reader) {
-        while (reader.canRead() && Character.isWhitespace(reader.peek())) {
-            reader.skip();
-        }
     }
 }

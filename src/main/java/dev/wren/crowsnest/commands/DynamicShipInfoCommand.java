@@ -9,13 +9,16 @@ import dev.wren.crowsnest.internal.pipeline.TransmascFemboyPipeline;
 import dev.wren.crowsnest.internal.pipeline.PipelineArgument;
 import dev.wren.crowsnest.internal.registries.OperationRegistry;
 import dev.wren.crowsnest.internal.registries.TypeBridgeRegistry;
+import dev.wren.crowsnest.internal.registries.TypeFormatterRegistry;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import org.valkyrienskies.core.api.ships.LoadedShip;
 
-import static dev.wren.crowsnest.internal.FormatUtility.asCommandOutput;
+import java.util.function.Supplier;
 
 /**
  * it can't be <i>that</i> hard, can it?
@@ -60,11 +63,16 @@ public class DynamicShipInfoCommand {
                             value = TypeBridgeRegistry.getBridge(result.getClass()).safeConvert(result);
                         }
 
-                        Object finalValue = value;
-                        ctx.getSource().sendSuccess(() -> asCommandOutput("result", finalValue), true);
+                        // todo replace "result" with command name + operations or smthn
+                        ctx.getSource().sendSuccess(formatOutput("result", value), true);
 
                         return 1;
                     })
                 ));
+    }
+
+    static Supplier<Component> formatOutput(String name, Object result) {
+        MutableComponent prefix = Component.literal(name + ": " + result.getClass().getSimpleName() + "\n");
+        return () ->  prefix.append(TypeFormatterRegistry.format(result));
     }
 }

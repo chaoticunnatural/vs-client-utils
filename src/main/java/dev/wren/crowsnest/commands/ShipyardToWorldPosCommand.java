@@ -10,7 +10,6 @@ import net.minecraft.core.BlockPos;
 
 import dev.wren.crowsnest.internal.Utility;
 
-import static dev.wren.crowsnest.internal.Utility.formatBlockPos;
 import static dev.wren.crowsnest.internal.Utility.l;
 
 public class ShipyardToWorldPosCommand {
@@ -27,6 +26,10 @@ public class ShipyardToWorldPosCommand {
                     return Command.SINGLE_SUCCESS;
                 })
             );
+    }
+
+    static String formatBlockPos(BlockPos pos) {
+        return "("+pos.getX()+", "+pos.getY()+", "+pos.getZ()+")";
     }
 
 }

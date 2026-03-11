@@ -15,7 +15,9 @@ import org.valkyrienskies.core.api.ships.LoadedShip;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * blame izzy for the class name
+ */
 public class TransmascFemboyPipeline {
 
     private final List<OperationNode> nodes;
