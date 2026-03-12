@@ -30,6 +30,7 @@ public class Pipeline {
 
     public static Pipeline parse(String input) throws CommandSyntaxException {
         PipelineReader reader = new PipelineReader(input);
+        System.out.println(reader.content());
         Pipeline pipeline = new Pipeline();
         Class<?> currentType = LoadedShip.class;
 

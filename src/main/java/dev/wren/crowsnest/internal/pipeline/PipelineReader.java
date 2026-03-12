@@ -7,11 +7,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PipelineReader {
-    private List<String> content;
+public record PipelineReader(ArrayList<String> content) {
 
-    public PipelineReader(String initial) {
-        this.content = Arrays.stream(initial.split(" ")).toList();
+    public PipelineReader(String content) {
+        this(new ArrayList<>(List.of(content.split(" "))));
     }
 
     public enum Values {
@@ -27,17 +26,17 @@ public class PipelineReader {
         return !content.isEmpty();
     }
 
-    private static PipelineReader.Values getValueForType(Class<?> type) {
+    private static Values getValueForType(Class<?> type) {
         if (type == Vec3.class)
-            return PipelineReader.Values.VEC3;
+            return Values.VEC3;
         else if (type == Integer.class)
-            return PipelineReader.Values.INT;
+            return Values.INT;
         else if (type == Float.class)
-            return PipelineReader.Values.FLOAT;
+            return Values.FLOAT;
         else if (type == Double.class)
-            return PipelineReader.Values.DOUBLE;
+            return Values.DOUBLE;
         else
-            return PipelineReader.Values.STRING_OR_OTHER;
+            return Values.STRING_OR_OTHER;
     }
 
     public Object getNext(Values type) {

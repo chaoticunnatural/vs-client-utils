@@ -12,6 +12,9 @@ import dev.wren.crowsnest.internal.registries.TypeFormatterRegistry;
 import java.text.DecimalFormat;
 import java.util.Map;
 
+import static dev.wren.crowsnest.internal.registries.TypeFormatterRegistry.Format;
+import static dev.wren.crowsnest.internal.registries.TypeFormatterRegistry.Format.of;
+
 public class TypeFormatters {
 
 
@@ -19,69 +22,65 @@ public class TypeFormatters {
         logger.info("Registering type formatters...");
 
         TypeFormatterRegistry.registerFormatter(AABB.class, ((aabb, builder) ->
-                builder.piece("Min: ", ChatFormatting.WHITE)
-                        .piece(formatXYZPosition(aabb.minX, aabb.minY, aabb.minZ))
-                        .piece(NEWLINE)
-                        .piece("Max: ", ChatFormatting.WHITE)
-                        .piece(formatXYZPosition(aabb.maxX, aabb.maxY, aabb.maxZ))
-                        .piece(NEWLINE)
-                        .piece("Size: ", ChatFormatting.WHITE)
-                        .piece(formatXYZ(aabb.getXsize(), aabb.getYsize(), aabb.getZsize()))
-                        .piece(NEWLINE)
-                        .piece("Volume: ")
-                        .piece(formatNumber(aabb.getXsize() * aabb.getYsize() * aabb.getZsize()), ChatFormatting.YELLOW)
+                builder.format("Min: ", ChatFormatting.WHITE)
+                        .format(formatXYZPosition(aabb.minX, aabb.minY, aabb.minZ))
+                        .format(NEWLINE)
+                        .format("Max: ", ChatFormatting.WHITE)
+                        .format(formatXYZPosition(aabb.maxX, aabb.maxY, aabb.maxZ))
+                        .format(NEWLINE)
+                        .format("Size: ", ChatFormatting.WHITE)
+                        .format(formatXYZ(aabb.getXsize(), aabb.getYsize(), aabb.getZsize()))
+                        .format(NEWLINE)
+                        .format("Volume: ")
+                        .format(formatNumber(aabb.getXsize() * aabb.getYsize() * aabb.getZsize()), ChatFormatting.YELLOW)
         ));
 
         TypeFormatterRegistry.registerFormatter(Vec3.class, ((vec3, builder) ->
-                builder.piece(formatXYZ(vec3.x(), vec3.y(), vec3.z()))
-                        .piece(NEWLINE)
-                        .piece("Length: ", ChatFormatting.WHITE)
-                        .piece(formatNumber(vec3.length()), ChatFormatting.YELLOW)
+                builder.format(formatXYZ(vec3.x(), vec3.y(), vec3.z()))
+                        .format(NEWLINE)
+                        .format("Length: ", ChatFormatting.WHITE)
+                        .format(formatNumber(vec3.length()), ChatFormatting.YELLOW)
         ));
 
         TypeFormatterRegistry.registerFormatter(Quaterniondc.class, (qdc, builder) ->
-                builder.piece(formatXYZ(qdc.x(), qdc.y(), qdc.z()))
-                        .piece(SEP)
-                        .piece("W: ", ChatFormatting.WHITE)
-                        .piece(formatNumber(qdc.w()), ChatFormatting.YELLOW)
-                        .piece(NEWLINE)
-                        .piece("Angle: ", ChatFormatting.WHITE)
-                        .piece(formatNumber(qdc.angle()), ChatFormatting.GOLD)
+                builder.format(formatXYZ(qdc.x(), qdc.y(), qdc.z()))
+                        .format(SEP)
+                        .format("W: ", ChatFormatting.WHITE)
+                        .format(formatNumber(qdc.w()), ChatFormatting.YELLOW)
+                        .format(NEWLINE)
+                        .format("Angle: ", ChatFormatting.WHITE)
+                        .format(formatNumber(qdc.angle()), ChatFormatting.GOLD)
         );
     }
 
-    public static Map<String, ChatFormatting[]> formatXYZ(double x, double y, double z) {
-        return Map.ofEntries(
-                piece("X: ", ChatFormatting.WHITE),
-                piece(formatNumber(x), ChatFormatting.RED),
+    public static Format[] formatXYZ(double x, double y, double z) {
+        return new Format[]{
+                of("X: ", ChatFormatting.WHITE),
+                of(formatNumber(x), ChatFormatting.RED),
                 SEP,
-                piece("Y: ", ChatFormatting.WHITE),
-                piece(formatNumber(y), ChatFormatting.GREEN),
+                of("Y: ", ChatFormatting.WHITE),
+                of(formatNumber(y), ChatFormatting.GREEN),
                 SEP,
-                piece("Z: ", ChatFormatting.WHITE),
-                piece(formatNumber(z), ChatFormatting.BLUE)
-        );
+                of("Z: ", ChatFormatting.WHITE),
+                of(formatNumber(z), ChatFormatting.BLUE)
+        };
     }
 
-    public static Map<String, ChatFormatting[]> formatXYZPosition(double x, double y, double z) {
-        return Map.ofEntries(
-                piece("(", ChatFormatting.WHITE),
-                piece(formatNumber(x), ChatFormatting.RED),
+    public static Format[] formatXYZPosition(double x, double y, double z) {
+        return new Format[]{
+                of("(", ChatFormatting.WHITE),
+                of(formatNumber(x), ChatFormatting.RED),
                 SEP,
-                piece(formatNumber(y), ChatFormatting.GREEN),
+                of(formatNumber(y), ChatFormatting.GREEN),
                 SEP,
-                piece(formatNumber(z), ChatFormatting.BLUE),
-                piece(")", ChatFormatting.WHITE)
-        );
+                of(formatNumber(z), ChatFormatting.BLUE),
+                of(")", ChatFormatting.WHITE)
+        };
     }
 
-    public static Map.Entry<String, ChatFormatting[]> NEWLINE = piece("\n", ChatFormatting.WHITE);
+    public static Format NEWLINE = of("\n", ChatFormatting.WHITE);
 
-    public static Map.Entry<String, ChatFormatting[]> SEP = piece(", ", ChatFormatting.WHITE);
-
-    public static Map.Entry<String, ChatFormatting[]> piece(String content, ChatFormatting... styles) {
-        return Map.entry(content, styles);
-    }
+    public static Format SEP = of(", ", ChatFormatting.WHITE);
 
     private static final DecimalFormat NORMAL_FORMAT = new DecimalFormat("#,##0.###");
 

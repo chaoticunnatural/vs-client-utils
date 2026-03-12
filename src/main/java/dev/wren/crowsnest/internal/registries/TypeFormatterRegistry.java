@@ -4,7 +4,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -38,33 +40,37 @@ public class TypeFormatterRegistry {
         return Component.literal(object.toString());
     }
 
+    public record Format(String content, ChatFormatting... formats) {
+        public static Format of(String content, ChatFormatting... formats) {
+            return new Format(content, formats);
+        }
+
+        public static Format of(Component content, ChatFormatting... formats) {
+            return new Format(content.getString(), formats);
+        }
+    }
 
     public static class FormatBuilder {
-        private final Map<String, ChatFormatting[]> contentMap;
+        private final ArrayList<Format> formatList;
 
         public FormatBuilder() {
-            contentMap = new HashMap<>();
+            formatList = new ArrayList<>();
         }
 
-        public FormatBuilder piece(Map<String, ChatFormatting[]> piece) {
-            contentMap.putAll(piece);
+        public FormatBuilder format(Format... format) {
+            formatList.addAll(List.of(format));
             return this;
         }
 
-        public FormatBuilder piece(String content, ChatFormatting... formats) {
-            contentMap.put(content, formats);
-            return this;
-        }
-
-        public FormatBuilder piece(Map.Entry<String, ChatFormatting[]> piece) {
-            contentMap.put(piece.getKey(), piece.getValue());
+        public FormatBuilder format(String content, ChatFormatting... formats) {
+            formatList.add(Format.of(content, formats));
             return this;
         }
 
         public Component build() {
             MutableComponent initial = Component.literal("");
-            for (Map.Entry<String, ChatFormatting[]> piece : this.contentMap.entrySet()) {
-                initial.append(Component.literal(piece.getKey()).withStyle(piece.getValue()));
+            for (Format format : this.formatList) {
+                initial.append(Component.literal(format.content()).withStyle(format.formats()));
             }
 
             return initial;

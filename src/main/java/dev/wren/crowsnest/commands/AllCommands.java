@@ -25,7 +25,5 @@ public class AllCommands {
         LiteralArgumentBuilder<CommandSourceStack> commandRoot = Commands.literal("crowsnest");
 
         LiteralCommandNode<CommandSourceStack> commandRootNode = event.getDispatcher().register(commandRoot);
-
-        event.getDispatcher().register(Commands.literal("cn").redirect(commandRootNode));
     }
 }
