@@ -3,7 +3,6 @@ package dev.wren.crowsnest.registries;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-import org.apache.logging.log4j.Logger;
 import org.joml.primitives.AABBdc;
 import org.joml.primitives.AABBic;
 import org.valkyrienskies.core.api.bodies.properties.BodyKinematics;
@@ -15,9 +14,7 @@ import dev.wren.crowsnest.internal.registries.OperationRegistry;
 
 public class Operations {
 
-    public static void register(Logger logger) {
-        logger.info("Registering operations...");
-
+    public static void register() {
         OperationRegistry.forType(LoadedShip.class, opBuilder ->
             opBuilder
 
@@ -67,6 +64,7 @@ public class Operations {
             .operation(Double.class, (v, a) -> v.distanceTo(a.getVec3("vec3")), "distanceTo", ArgumentSet.vec3("vec3"))
             .operation(Double.class, (v, a) -> v.distanceToSqr(a.getVec3("vec3")), "distanceToSqr", ArgumentSet.vec3("vec3"))
             .operation(Double.class, (v, a) -> v.dot(a.getVec3("vec3")), "dot", ArgumentSet.vec3("vec3"))
+            .operation(Double.class, (v, a) -> v.get(a.getAxis("axis")), "getForAxis", ArgumentSet.axis("axis"))
         );
     }
 }

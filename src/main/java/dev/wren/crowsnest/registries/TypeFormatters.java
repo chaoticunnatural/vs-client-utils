@@ -4,23 +4,18 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-import org.apache.logging.log4j.Logger;
 import org.joml.Quaterniondc;
 
 import dev.wren.crowsnest.internal.registries.TypeFormatterRegistry;
 
 import java.text.DecimalFormat;
-import java.util.Map;
 
 import static dev.wren.crowsnest.internal.registries.TypeFormatterRegistry.Format;
 import static dev.wren.crowsnest.internal.registries.TypeFormatterRegistry.Format.of;
 
 public class TypeFormatters {
 
-
-    public static void register(Logger logger) {
-        logger.info("Registering type formatters...");
-
+    public static void register() {
         TypeFormatterRegistry.registerFormatter(AABB.class, ((aabb, builder) ->
                 builder.format("Min: ", ChatFormatting.WHITE)
                         .format(formatXYZPosition(aabb.minX, aabb.minY, aabb.minZ))
@@ -55,6 +50,7 @@ public class TypeFormatters {
                         .build()
         );
     }
+
 
     public static Format[] formatXYZ(double x, double y, double z) {
         return new Format[]{

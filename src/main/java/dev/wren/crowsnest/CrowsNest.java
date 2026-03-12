@@ -21,9 +21,12 @@ public class CrowsNest {
     public static final Logger LOGGER = LogManager.getLogger();
 
     public CrowsNest(FMLJavaModLoadingContext context) {
-        TypeBridges.register(LOGGER);
-        TypeFormatters.register(LOGGER);
-        Operations.register(LOGGER);
+        LOGGER.info("Registering bridges...");
+        TypeBridges.register();
+        LOGGER.info("Registering formatters...");
+        TypeFormatters.register();
+        LOGGER.info("Registering operations...");
+        Operations.register();
 
         LOGGER.info("{} ({}) initialized!", NAME, MODID);
     }
